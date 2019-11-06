@@ -1,7 +1,7 @@
 CC=gcc
 FLAGS=-Wall -g 
 LIBS=-ltermbox
-OUT=simulate
+OUT=main
 INCLUDE=-I headers/
 OBJS=./out/main.o
 
