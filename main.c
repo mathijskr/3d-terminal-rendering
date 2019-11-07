@@ -1,9 +1,15 @@
 #include "main.h"
 
+#define DIMENSIONS 3
+
+#define CUBE_SIZE 28
+#define CUBE_CONNECTIONS_SIZE 24
+
 void draw3d_on_2d(int x, int y, int z, char c);
 void drawLine(int x, int y, int z, int next_x, int next_y, int next_z);
 
 void swap(int *i1, int *i2);
+
 
 int main(int argv, char **argc)
 {
@@ -23,17 +29,35 @@ int main(int argv, char **argc)
 
 	bool EXIT = false;
 
-	int cube[28] = {
+	int cube[CUBE_SIZE] = {
 	/*	x   y   z   */
-		0,  0,  5,
+		0,  0,  0,	/* Front side */
+		20, 0,  0,
+		20, 10, 0,
+		0,  10, 0,
+
+		0,  0,  5,	/* Back side */
 		20, 0,  5,
 		20, 10, 5,
 		0,  10, 5,
+	};
 
-		0,  0,  0,
-		20, 0,  0,
-		20, 10, 0,
-		0,  10, 0
+	int cube_connections[CUBE_CONNECTIONS_SIZE] = {
+	/*	point1	point2	*/
+		0,	1,	/* Front side */
+		1,	2,
+		2,	3,
+		3,	0,
+
+		4,	5,	/* Back side */	
+		5, 	6,
+		6,	7,
+		7,	4,
+
+		0,	4,	/* Connecting back and front */
+		1,	5,
+		2,	6,
+		3,	7
 	};
 
 	/* Quit loop if exit is true. */
@@ -48,18 +72,20 @@ int main(int argv, char **argc)
 			}
 		}
 
-		/* Draw cube skeleton. */
-		for(int i = 0; i < 28; i+=3) {
+		/* Draw cube points. */
+		for(int i = 0; i < CUBE_SIZE; i += DIMENSIONS) {
 			int x = cube[i]; int y = cube[i + 1]; int z = cube[i + 2];
 			draw3d_on_2d(x, y, z, '.');
+		}
 
-			/* Draw line between this point and next point. */
-			int next_index = i + 3;
-			if(i % 9 == 0) {
-				next_index -= 9;
-			}
-			int next_x = cube[next_index]; int next_y = cube[next_index + 1]; int next_z = cube[next_index + 2];
-			drawLine(x, y, z, next_x, next_y, next_z);
+		for(int i = 0; i < CUBE_CONNECTIONS_SIZE; i+=2) {
+			int index1 = cube_connections[i] * DIMENSIONS;
+			int index2 = cube_connections[i + 1] * DIMENSIONS;
+			int x1 = cube[index1]; int y1 = cube[index1 + 1]; int z1 = cube[index1 + 2];
+			int x2 = cube[index2]; int y2 = cube[index2 + 1]; int z2 = cube[index2 + 2];
+
+			/* Draw cube skeleton. */
+			drawLine(x1, y1, z1, x2, y2, z2);
 		}
 
 		/* Draw to screen. */
