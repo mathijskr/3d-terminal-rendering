@@ -23,17 +23,17 @@ int main(int argv, char **argc)
 
 	bool EXIT = false;
 
-	int cube[32] = {
-	/*	x   y   z    index of connected point	*/
-		0,  0,  0,   1,
-		0,  10, 0,   3,
-		20, 0,  0,   0,
-		20, 10, 0,   0,
+	int cube[28] = {
+	/*	x   y   z   */
+		0,  0,  5,
+		20, 0,  5,
+		20, 10, 5,
+		0,  10, 5,
 
-		0,  0,  5,   1,
-		0,  10, 5,   0,
-		20, 0,  5,   4,
-		20, 10, 5,   5
+		0,  0,  0,
+		20, 0,  0,
+		20, 10, 0,
+		0,  10, 0
 	};
 
 	/* Quit loop if exit is true. */
@@ -49,19 +49,17 @@ int main(int argv, char **argc)
 		}
 
 		/* Draw cube skeleton. */
-		for(int i = 0; i < 32; i+=4) {
+		for(int i = 0; i < 28; i+=3) {
 			int x = cube[i]; int y = cube[i + 1]; int z = cube[i + 2];
 			draw3d_on_2d(x, y, z, '.');
 
 			/* Draw line between this point and next point. */
-			int next_index = cube[i + 3];
-			if(next_index < 0 || next_index > 27) {
-				EXIT = true;
-				printf("Error in cube points...");
-			} else {
-				int next_x = cube[next_index * 4]; int next_y = cube[next_index * 4 + 1]; int next_z = cube[next_index * 4 + 2];
-				drawLine(x, y, z, next_x, next_y, next_z);
+			int next_index = i + 3;
+			if(i % 9 == 0) {
+				next_index -= 9;
 			}
+			int next_x = cube[next_index]; int next_y = cube[next_index + 1]; int next_z = cube[next_index + 2];
+			drawLine(x, y, z, next_x, next_y, next_z);
 		}
 
 		/* Draw to screen. */
@@ -91,6 +89,9 @@ void drawLine(int x, int y, int z, int next_x, int next_y, int next_z)
 	if(next_y < y)
 		swap(&next_y, &y);
 
+	if(next_z < z)
+		swap(&next_z, &z);
+
 	if(next_z == z) {
 		if(next_x == x) {
 			for(int line_y = y + 1; line_y < next_y; line_y++) {
@@ -104,7 +105,7 @@ void drawLine(int x, int y, int z, int next_x, int next_y, int next_z)
 	} else {
 		if(next_x == x && next_y == y) {
 			for(int line_z = z + 1; line_z < next_z; line_z++) {
-				draw3d_on_2d(x, y, line_z, '/');
+				draw3d_on_2d(x, y, line_z, '-');
 			}
 		}
 	}
