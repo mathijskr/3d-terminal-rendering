@@ -6,6 +6,8 @@
 
 #include "termbox.h"
 
+#include "cube.h"
+
 #define BACKGROUND_COLOR TB_BLACK
 
 #endif
