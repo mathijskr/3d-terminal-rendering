@@ -1,6 +1,9 @@
 #include "main.h"
 
 void draw3d_on_2d(int x, int y, int z, char c);
+void drawLine(int x, int y, int z, int next_x, int next_y, int next_z);
+
+void swap(int *i1, int *i2);
 
 int main(int argv, char **argc)
 {
@@ -20,16 +23,17 @@ int main(int argv, char **argc)
 
 	bool EXIT = false;
 
-	int cube[24] = {
-		0,  0,  0,
-		0,  10, 0,
-		20, 0,  0,
-		20, 10, 0,
+	int cube[32] = {
+	/*	x   y   z    index of connected point	*/
+		0,  0,  0,   1,
+		0,  10, 0,   3,
+		20, 0,  0,   0,
+		20, 10, 0,   0,
 
-		0,  0,  5,
-		0,  10, 5,
-		20, 0,  5,
-		20, 10, 5
+		0,  0,  5,   1,
+		0,  10, 5,   0,
+		20, 0,  5,   4,
+		20, 10, 5,   5
 	};
 
 	/* Quit loop if exit is true. */
@@ -45,24 +49,19 @@ int main(int argv, char **argc)
 		}
 
 		/* Draw cube skeleton. */
-		for(int i = 0; i < 24; i+=3) {
+		for(int i = 0; i < 32; i+=4) {
 			int x = cube[i]; int y = cube[i + 1]; int z = cube[i + 2];
 			draw3d_on_2d(x, y, z, '.');
 
 			/* Draw line between this point and next point. */
-			if(i < 21) {
-				int next_x = cube[i + 3]; int next_y = cube[i + 4]; int next_z = cube[i + 5];
-
-				if(z == next_z) {
-					for(int x_line = x + 1; x_line < next_x; x_line++) {
-						tb_change_cell(x_line, 10 + y, '-', TB_GREEN, BACKGROUND_COLOR);
-					}
-
-					for(int y_line = y + 1; y_line < next_y; y_line++) {
-						tb_change_cell(x, 10 + y_line, '|', TB_GREEN, BACKGROUND_COLOR);
-					}
-				}
-			} 
+			int next_index = cube[i + 3];
+			if(next_index < 0 || next_index > 27) {
+				EXIT = true;
+				printf("Error in cube points...");
+			} else {
+				int next_x = cube[next_index * 4]; int next_y = cube[next_index * 4 + 1]; int next_z = cube[next_index * 4 + 2];
+				drawLine(x, y, z, next_x, next_y, next_z);
+			}
 		}
 
 		/* Draw to screen. */
@@ -81,5 +80,39 @@ int main(int argv, char **argc)
 
 void draw3d_on_2d(int x, int y, int z, char c)
 {
-	tb_change_cell(x + 2 * z, 10 + (y - z), c, TB_GREEN, BACKGROUND_COLOR);
+	tb_change_cell(x + 2 * z, tb_height() - (20 + (y + z)), c, TB_GREEN, BACKGROUND_COLOR);
+}
+
+void drawLine(int x, int y, int z, int next_x, int next_y, int next_z)
+{
+	if(next_x < x)
+		swap(&next_x, &x);
+
+	if(next_y < y)
+		swap(&next_y, &y);
+
+	if(next_z == z) {
+		if(next_x == x) {
+			for(int line_y = y + 1; line_y < next_y; line_y++) {
+				draw3d_on_2d(x, line_y, z, '|');
+			}
+		} else if(next_y == y) {
+			for(int line_x = x + 1; line_x < next_x; line_x++) {
+				draw3d_on_2d(line_x, y, z, '-');
+			}
+		}
+	} else {
+		if(next_x == x && next_y == y) {
+			for(int line_z = z + 1; line_z < next_z; line_z++) {
+				draw3d_on_2d(x, y, line_z, '/');
+			}
+		}
+	}
+}
+
+void swap(int *i1, int *i2)
+{
+	int temp = *i1;
+	*i1 = *i2;
+	*i2 = temp;
 }
