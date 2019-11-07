@@ -36,7 +36,8 @@ int main(int argv, char **argc)
 		/* Draw cube points. */
 		for(int i = 0; i < CUBE_SIZE; i += DIMENSIONS) {
 			int x = cube.points[i]; int y = cube.points[i + 1]; int z = cube.points[i + 2];
-			draw3d(x, y, z, '.');
+			vec_3d point = {x, y, z};
+			draw3d(point, '.');
 		}
 
 		for(int i = 0; i < CUBE_CONNECTIONS_SIZE; i+=2) {
@@ -45,8 +46,11 @@ int main(int argv, char **argc)
 			int x1 = cube.points[index1]; int y1 = cube.points[index1 + 1]; int z1 = cube.points[index1 + 2];
 			int x2 = cube.points[index2]; int y2 = cube.points[index2 + 1]; int z2 = cube.points[index2 + 2];
 
+			vec_3d point1 = {x1, y1, z1};
+			vec_3d point2 = {x2, y2, z2};
+
 			/* Draw cube skeleton. */
-			drawLine(x1, y1, z1, x2, y2, z2);
+			drawLine(point1, point2);
 		}
 
 		/* Draw to screen. */
@@ -63,39 +67,42 @@ int main(int argv, char **argc)
 	return 0;
 }
 
-void draw3d(int x, int y, int z, char c)
+void draw3d(vec_3d point, char c)
 {
-	tb_change_cell(x + 2 * z, tb_height() - (20 + (y + z)), c, TB_GREEN, BACKGROUND_COLOR);
+	tb_change_cell(point.x + 2 * point.z, tb_height() - (20 + (point.y + point.z)), c, TB_GREEN, BACKGROUND_COLOR);
 }
 
-void drawLine(int x, int y, int z, int next_x, int next_y, int next_z)
+void drawLine(vec_3d point1, vec_3d point2)
 {
-	if(next_x < x)
-		swap(&next_x, &x);
+	if(point2.x < point1.x)
+		swap(&point2.x, &point1.x);
 
-	if(next_y < y)
-		swap(&next_y, &y);
+	if(point2.y < point1.y)
+		swap(&point2.y, &point1.y);
 
-	if(next_z < z)
-		swap(&next_z, &z);
+	if(point2.z < point1.z)
+		swap(&point2.z, &point1.z);
 
-	if(next_z == z) {
-		if(next_x == x) {
+	if(point2.z == point1.z) {
+		if(point2.x == point1.x) {
 			/* Draw line between two y coordinates at the same x and z coordinates. */
-			for(int line_y = y + 1; line_y < next_y; line_y++) {
-				draw3d(x, line_y, z, '|');
+			for(int line_y = point1.y + 1; line_y < point2.y; line_y++) {
+				vec_3d point = {point1.x, line_y, point1.z};
+				draw3d(point, '|');
 			}
-		} else if(next_y == y) {
+		} else if(point2.y == point1.y) {
 			/* Draw line between two x coordinates at the same y and z coordinates. */
-			for(int line_x = x + 1; line_x < next_x; line_x++) {
-				draw3d(line_x, y, z, '-');
+			for(int line_x = point1.x + 1; line_x < point2.x; line_x++) {
+				vec_3d point = {line_x, point1.y, point1.z};
+				draw3d(point, '-');
 			}
 		}
 	} else {
-		if(next_x == x && next_y == y) {
+		if(point2.x == point1.x && point2.y == point1.y) {
 			/* Draw line between two z coordinates at the same x and y coordinates. */
-			for(int line_z = z + 1; line_z < next_z; line_z++) {
-				draw3d(x, y, line_z, '-');
+			for(int line_z = point1.z + 1; line_z < point2.z; line_z++) {
+				vec_3d point = {point1.x, point1.y, line_z};
+				draw3d(point, '-');
 			}
 		}
 	}

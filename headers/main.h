@@ -7,9 +7,10 @@
 #include "termbox.h"
 
 #include "cube.h"
+#include "vec_3d.h"
 
-void draw3d(int x, int y, int z, char c);
-void drawLine(int x, int y, int z, int next_x, int next_y, int next_z);
+void draw3d(vec_3d point, char c);
+void drawLine(vec_3d point1, vec_3d point2);
 
 void swap(int *i1, int *i2);
 
