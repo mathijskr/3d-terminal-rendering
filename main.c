@@ -2,11 +2,6 @@
 
 #define DIMENSIONS 3
 
-void draw3d(int x, int y, int z, char c);
-void drawLine(int x, int y, int z, int next_x, int next_y, int next_z);
-
-void swap(int *i1, int *i2);
-
 
 int main(int argv, char **argc)
 {
@@ -86,16 +81,19 @@ void drawLine(int x, int y, int z, int next_x, int next_y, int next_z)
 
 	if(next_z == z) {
 		if(next_x == x) {
+			/* Draw line between two y coordinates at the same x and z coordinates. */
 			for(int line_y = y + 1; line_y < next_y; line_y++) {
 				draw3d(x, line_y, z, '|');
 			}
 		} else if(next_y == y) {
+			/* Draw line between two x coordinates at the same y and z coordinates. */
 			for(int line_x = x + 1; line_x < next_x; line_x++) {
 				draw3d(line_x, y, z, '-');
 			}
 		}
 	} else {
 		if(next_x == x && next_y == y) {
+			/* Draw line between two z coordinates at the same x and y coordinates. */
 			for(int line_z = z + 1; line_z < next_z; line_z++) {
 				draw3d(x, y, line_z, '-');
 			}
