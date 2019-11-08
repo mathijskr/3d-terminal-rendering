@@ -8,7 +8,7 @@ typedef struct Cube Cube;
 
 struct Cube 
 {
-	int points[CUBE_SIZE];
+	float points[CUBE_SIZE];
 	int connections[CUBE_CONNECTIONS_SIZE];
 } cube;
 

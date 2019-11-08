@@ -10,15 +10,16 @@
 #include "vector.h"
 #include "matrix.h"
 
-void drawCube();
-void drawCubeSides();
+void drawCube(matrix_3x3 *proj);
+void drawCubeSides(matrix_3x3 *proj);
 
-void draw3d(vec_3d point, char c);
-void drawLine(vec_3d point1, vec_3d point2);
+void draw3d(vec_3d point, matrix_3x3 *proj, char c);
+void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *proj);
 
 void drawBackground();
 
-void swap(int *i1, int *i2);
+int cmp_float(float *f1, float *f2);
+void swap(float *i1, float *i2);
 
 #define BACKGROUND_COLOR TB_BLACK
 
