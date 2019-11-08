@@ -19,6 +19,8 @@ vec_3d multiply_matrix_3x3_vec3(matrix_3x3 *m1, vec_3d *v1);
 matrix_3x3 multiply_matrix_3x3_3x3(matrix_3x3 *m1, matrix_3x3 *m2);
 matrix_3x3 multiply_matrix_3x3_scalar(matrix_3x3 *m, float scalar);
 
-matrix_3x3 rotate_matrix(float angle);
+matrix_3x3 rotate_x_matrix(float angle);
+matrix_3x3 rotate_y_matrix(float angle);
+matrix_3x3 rotate_z_matrix(float angle);
 
 #endif

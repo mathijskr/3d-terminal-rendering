@@ -33,7 +33,35 @@ matrix_3x3 multiply_matrix_3x3_scalar(matrix_3x3 *m, float scalar)
 	return result;
 }
 
-matrix_3x3 rotate_matrix(float angle)
+matrix_3x3 rotate_x_matrix(float angle)
+{
+	float cos_angle = cos(angle);
+	float sin_angle = sin(angle);
+
+	matrix_3x3 result = {
+		1.0f, 0.0f, 0.0f,
+		0.0f, cos_angle, -sin_angle,
+		0.0f, sin_angle, cos_angle 
+	};
+
+	return result;
+}
+
+matrix_3x3 rotate_y_matrix(float angle)
+{
+	float cos_angle = cos(angle);
+	float sin_angle = sin(angle);
+
+	matrix_3x3 result = {
+		cos_angle, 0.0f, sin_angle,
+		0.0f, 1.0f, 0.0f,
+		-sin_angle, 0.0f, cos_angle 
+	};
+
+	return result;
+}
+
+matrix_3x3 rotate_z_matrix(float angle)
 {
 	float cos_angle = cos(angle);
 	float sin_angle = sin(angle);

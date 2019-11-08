@@ -58,6 +58,12 @@ int main(int argv, char **argc)
 
 	bool EXIT = false;
 
+	matrix_3x3 identity_matrix = {
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f
+	};
+
 	matrix_3x3 proj = {	
 		1.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 1.0f,
@@ -65,18 +71,32 @@ int main(int argv, char **argc)
 	};
 
 	matrix_3x3 scale = {
-		2.0f, 0.0f, 0.0f,
-		0.0f, 2.0f, 0.0f,
-		0.0f, 0.0f, 2.0f
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f
 	};
 
-	float rotation_angle = 0.0f;
+	struct Rotation_angle {
+		float x, y, z;
+	} rotation_angle;
+
+	rotation_angle.x = 0.0f;
+	rotation_angle.y = 0.0f;
+	rotation_angle.z = 0.0f;
 
 	/* Quit loop if exit is true. */
 	while(!EXIT){
 		tb_clear();
 
-		matrix_3x3 rotate = rotate_matrix(rotation_angle);
+		matrix_3x3 rotate = identity_matrix;
+
+		matrix_3x3 rotate_x = rotate_x_matrix(rotation_angle.x);
+		matrix_3x3 rotate_y = rotate_y_matrix(rotation_angle.y);
+		matrix_3x3 rotate_z = rotate_z_matrix(rotation_angle.z);
+
+		rotate = multiply_matrix_3x3_3x3(&rotate, &rotate_x);
+		rotate = multiply_matrix_3x3_3x3(&rotate, &rotate_y);
+		rotate = multiply_matrix_3x3_3x3(&rotate, &rotate_z);
 
 		matrix_3x3 trans = multiply_matrix_3x3_3x3(&proj, &rotate);
 		trans = multiply_matrix_3x3_3x3(&trans, &scale);
@@ -99,8 +119,14 @@ int main(int argv, char **argc)
 		if(ev.ch == '-')
 			scale = multiply_matrix_3x3_scalar(&scale, 0.99f);
 
-		if(ev.ch == 'r')
-			rotation_angle += 0.1f;
+		if(ev.ch == 'x')
+			rotation_angle.x += 0.1f;
+		if(ev.ch == 'y')
+			rotation_angle.y += 0.1f;
+		if(ev.ch == 'z')
+			rotation_angle.z += 0.1f;
+
+
 	}
 
 	tb_shutdown();
