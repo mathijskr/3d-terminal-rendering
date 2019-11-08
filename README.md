@@ -1,6 +1,8 @@
 # 3d-terminal-rendering
 A 3d cube demo using termbox to show characters in the terminal.
 
+![]("3d_demo.gif")
+
 ## How to build:
 1. Install termbox development files: 
 * Void Linux: xbps-install termbox-devel
