@@ -7,6 +7,41 @@ int screen_ratio = 1.0f;
 
 int main(int argv, char **argc)
 {
+	Cube cube = {
+	{
+		/* Points */
+		/*	x   y   z   */
+		0.0f,  0.0f,  0.0f,	/* Front side */
+		20.0f, 0.0f,  0.0f,
+		20.0f, 10.0f, 0.0f,
+		0.0f,  10.0f, 0.0f,
+
+		0.0f,  0.0f,  5.0f,	/* Back side */
+		20.0f, 0.0f,  5.0f,
+		20.0f, 10.0f, 5.0f,
+		0.0f,  10.0f, 5.0f,
+	},
+		/* Connections */
+	{
+	/*	point1	point2	*/	
+		4,	5,	/* Back side */	
+		5, 	6,
+		6,	7,
+		7,	4,
+
+		0,	1,	/* Front side */
+		1,	2,
+		2,	3,
+		3,	0,
+
+
+		0,	4,	/* Connecting back and front */
+		1,	5,
+		2,	6,
+		3,	7
+	}
+	};
+
 	int code = tb_init();
 
 	/* Check if termbox was initialized. */
@@ -35,7 +70,7 @@ int main(int argv, char **argc)
 		tb_clear();
 	
 		drawBackground();
-		drawCube(&proj);	
+		drawCube(&proj, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);	
 
 		/* Draw to screen. */
 		tb_present();
@@ -51,26 +86,26 @@ int main(int argv, char **argc)
 	return 0;
 }
 
-void drawCube(matrix_3x3 *proj)
+void drawCube(matrix_3x3 *proj, float *points, int points_size, int *connections, int connections_size)
 {
 	/* Draw cube points. */
-	for(int i = 0; i < CUBE_SIZE; i += DIMENSIONS) {
-		int x = cube.points[i]; int y = cube.points[i + 1]; int z = cube.points[i + 2];
+	for(int i = 0; i < points_size; i += DIMENSIONS) {
+		int x = points[i]; int y = points[i + 1]; int z = points[i + 2];
 		vec_3d point = {x, y, z};
 		draw3d(point, proj, '.');
 	}
 
-	drawCubeSides(proj);
+	drawCubeSides(proj, points, points_size, connections, connections_size);
 }
 
-void drawCubeSides(matrix_3x3 *proj)
+void drawCubeSides(matrix_3x3 *proj, float *points, int points_size, int *connections, int connections_size)
 {
-	for(int i = 0; i < CUBE_CONNECTIONS_SIZE; i+=2) {
-		int index1 = cube.connections[i] * DIMENSIONS;
-		int index2 = cube.connections[i + 1] * DIMENSIONS;
+	for(int i = 0; i < connections_size; i+=2) {
+		int index1 = connections[i] * DIMENSIONS;
+		int index2 = connections[i + 1] * DIMENSIONS;
 
-		vec_3d point1 = { cube.points[index1], cube.points[index1 + 1], cube.points[index1 + 2] };
-		vec_3d point2 = { cube.points[index2], cube.points[index2 + 1], cube.points[index2 + 2] };
+		vec_3d point1 = { points[index1], points[index1 + 1], points[index1 + 2] };
+		vec_3d point2 = { points[index2], points[index2 + 1], points[index2 + 2] };
 
 		/* Draw cube skeleton. */
 		drawLine(point1, point2, proj);
