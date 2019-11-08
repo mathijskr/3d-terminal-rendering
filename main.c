@@ -2,6 +2,12 @@
 
 #define DIMENSIONS 3
 
+matrix_3x3 proj = {	
+		1, 0, 1,
+		0, 1, 1,
+		0, 0, 0
+};
+
 
 int main(int argv, char **argc)
 {
@@ -25,33 +31,8 @@ int main(int argv, char **argc)
 	while(!EXIT){
 		tb_clear();
 
-		/* Draw the background. */
-		for(int x = 0; x < tb_width(); x++){
-			for(int y = 0; y < tb_height(); y++){
-				tb_change_cell(x, y, ' ', BACKGROUND_COLOR,
-				BACKGROUND_COLOR);
-			}
-		}
-
-		/* Draw cube points. */
-		for(int i = 0; i < CUBE_SIZE; i += DIMENSIONS) {
-			int x = cube.points[i]; int y = cube.points[i + 1]; int z = cube.points[i + 2];
-			vec_3d point = {x, y, z};
-			draw3d(point, '.');
-		}
-
-		for(int i = 0; i < CUBE_CONNECTIONS_SIZE; i+=2) {
-			int index1 = cube.connections[i] * DIMENSIONS;
-			int index2 = cube.connections[i + 1] * DIMENSIONS;
-			int x1 = cube.points[index1]; int y1 = cube.points[index1 + 1]; int z1 = cube.points[index1 + 2];
-			int x2 = cube.points[index2]; int y2 = cube.points[index2 + 1]; int z2 = cube.points[index2 + 2];
-
-			vec_3d point1 = {x1, y1, z1};
-			vec_3d point2 = {x2, y2, z2};
-
-			/* Draw cube skeleton. */
-			drawLine(point1, point2);
-		}
+		drawBackground();
+		drawCube();	
 
 		/* Draw to screen. */
 		tb_present();
@@ -67,9 +48,39 @@ int main(int argv, char **argc)
 	return 0;
 }
 
+void drawCube()
+{
+	/* Draw cube points. */
+	for(int i = 0; i < CUBE_SIZE; i += DIMENSIONS) {
+		int x = cube.points[i]; int y = cube.points[i + 1]; int z = cube.points[i + 2];
+		vec_3d point = {x, y, z};
+		draw3d(point, '.');
+	}
+
+	drawCubeSides();
+}
+
+void drawCubeSides()
+{
+	for(int i = 0; i < CUBE_CONNECTIONS_SIZE; i+=2) {
+		int index1 = cube.connections[i] * DIMENSIONS;
+		int index2 = cube.connections[i + 1] * DIMENSIONS;
+		int x1 = cube.points[index1]; int y1 = cube.points[index1 + 1]; int z1 = cube.points[index1 + 2];
+		int x2 = cube.points[index2]; int y2 = cube.points[index2 + 1]; int z2 = cube.points[index2 + 2];
+
+		vec_3d point1 = {x1, y1, z1};
+		vec_3d point2 = {x2, y2, z2};
+
+		/* Draw cube skeleton. */
+		drawLine(point1, point2);
+	}
+}
+
 void draw3d(vec_3d point, char c)
 {
-	tb_change_cell(point.x + 2 * point.z, tb_height() - (20 + (point.y + point.z)), c, TB_GREEN, BACKGROUND_COLOR);
+	vec_3d point_proj = matrix_muliply(&proj, &point);
+
+	tb_change_cell(point_proj.x, tb_height() - (20 + point_proj.y), c, TB_GREEN, BACKGROUND_COLOR);
 }
 
 void drawLine(vec_3d point1, vec_3d point2)
@@ -104,6 +115,16 @@ void drawLine(vec_3d point1, vec_3d point2)
 				vec_3d point = {point1.x, point1.y, line_z};
 				draw3d(point, '-');
 			}
+		}
+	}
+}
+
+void drawBackground()
+{
+	for(int x = 0; x < tb_width(); x++){
+		for(int y = 0; y < tb_height(); y++){
+			tb_change_cell(x, y, ' ', BACKGROUND_COLOR,
+			BACKGROUND_COLOR);
 		}
 	}
 }

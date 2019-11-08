@@ -16,16 +16,17 @@ Cube cube = {
 },
 	/* Connections */
 {
-/*	point1	point2	*/
+/*	point1	point2	*/	
+	4,	5,	/* Back side */	
+	5, 	6,
+	6,	7,
+	7,	4,
+
 	0,	1,	/* Front side */
 	1,	2,
 	2,	3,
 	3,	0,
 
-	4,	5,	/* Back side */	
-	5, 	6,
-	6,	7,
-	7,	4,
 
 	0,	4,	/* Connecting back and front */
 	1,	5,
