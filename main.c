@@ -4,6 +4,8 @@
 
 int screen_ratio = 1.0f;
 
+float CUBE_X_POS = 0.0f;
+float CUBE_Y_POS = 0.0f;
 
 int main(int argv, char **argc)
 {
@@ -12,14 +14,14 @@ int main(int argv, char **argc)
 		/* Points */
 		/*	x   y   z   */
 		0.0f,  0.0f,  0.0f,	/* Front side */
-		20.0f, 0.0f,  0.0f,
-		20.0f, 10.0f, 0.0f,
+		10.0f, 0.0f,  0.0f,
+		10.0f, 10.0f, 0.0f,
 		0.0f,  10.0f, 0.0f,
 
-		0.0f,  0.0f,  5.0f,	/* Back side */
-		20.0f, 0.0f,  5.0f,
-		20.0f, 10.0f, 5.0f,
-		0.0f,  10.0f, 5.0f,
+		0.0f,  0.0f,  10.0f,	/* Back side */
+		10.0f, 0.0f,  10.0f,
+		10.0f, 10.0f, 10.0f,
+		0.0f,  10.0f, 10.0f,
 	},
 		/* Connections */
 	{
@@ -53,11 +55,7 @@ int main(int argv, char **argc)
 	tb_select_input_mode(TB_INPUT_ESC);
 	tb_select_output_mode(TB_OUTPUT_NORMAL);
 	tb_clear();
-
-	struct tb_event ev;
-
-	bool EXIT = false;
-
+	
 	matrix_3x3 identity_matrix = {
 		1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
@@ -84,9 +82,14 @@ int main(int argv, char **argc)
 	rotation_angle.y = 0.0f;
 	rotation_angle.z = 0.0f;
 
-	/* Quit loop if exit is true. */
+	struct tb_event ev;
+	bool EXIT = false;
+
 	while(!EXIT){
 		tb_clear();
+
+		CUBE_X_POS = tb_width() / 2.0f;
+		CUBE_Y_POS = tb_height() / 2.0f;
 
 		matrix_3x3 rotate = identity_matrix;
 
@@ -102,6 +105,10 @@ int main(int argv, char **argc)
 		trans = multiply_matrix_3x3_3x3(&trans, &scale);
 	
 		drawBackground();
+
+		char text[70] = "Rotate with the x, y and z keys. Increase / decrease size with + and -";
+		drawText(10, 5, text, 70, TB_GREEN, TB_WHITE);
+
 		drawCube(&trans, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);	
 
 		/* Draw to screen. */
@@ -113,20 +120,18 @@ int main(int argv, char **argc)
 		if(ev.key == TB_KEY_ESC)
 			EXIT = true;
 
-		if(ev.ch == '+')
+		if(ev.ch == CONTROL_INC_SIZE)
 			scale = multiply_matrix_3x3_scalar(&scale, 1.01f);
 
-		if(ev.ch == '-')
+		if(ev.ch == CONTROL_DEC_SIZE)
 			scale = multiply_matrix_3x3_scalar(&scale, 0.99f);
 
-		if(ev.ch == 'x')
+		if(ev.ch == CONTROL_ROTATE_X)
 			rotation_angle.x += 0.1f;
-		if(ev.ch == 'y')
+		if(ev.ch == CONTROL_ROTATE_Y)
 			rotation_angle.y += 0.1f;
-		if(ev.ch == 'z')
+		if(ev.ch == CONTROL_ROTATE_Z)
 			rotation_angle.z += 0.1f;
-
-
 	}
 
 	tb_shutdown();
@@ -163,7 +168,7 @@ void draw3d(vec_3d point, matrix_3x3 *trans, char c)
 {
 	vec_3d point_proj = multiply_matrix_3x3_vec3(trans, &point);
 
-	tb_change_cell(point_proj.x + 20.0f, tb_height() - screen_ratio * (20.0f + point_proj.y), c, TB_GREEN, BACKGROUND_COLOR);
+	tb_change_cell(point_proj.x + CUBE_X_POS, tb_height() - screen_ratio * (CUBE_Y_POS + point_proj.y), c, TB_GREEN, BACKGROUND_COLOR);
 }
 
 void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *trans)
@@ -182,7 +187,7 @@ void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *trans)
 			/* Draw line between two y coordinates at the same x and z coordinates. */
 			for(int line_y = point1.y + 1; line_y < point2.y; line_y++) {
 				vec_3d point = {point1.x, line_y, point1.z};
-				draw3d(point, trans, '|');
+				draw3d(point, trans, '-');
 			}
 		} else if(cmp_float(&point2.y, &point1.y) == 0) {
 			/* Draw line between two x coordinates at the same y and z coordinates. */
@@ -210,6 +215,12 @@ void drawBackground()
 			BACKGROUND_COLOR);
 		}
 	}
+}
+
+void drawText(int x, int y, char *text, int text_size, int color, int back_color)
+{
+	for(int i = 0; i < text_size; i++)
+		tb_change_cell(x++, y, text[i], color, back_color);
 }
 
 int cmp_float(float *f1, float *f2)
