@@ -1,6 +1,6 @@
 CC=gcc
 FLAGS=-Wall -g 
-LIBS=-ltermbox
+LIBS=-ltermbox -lm
 OUT=main
 INCLUDE=-I headers/
 OBJS=./out/main.o ./out/matrix.o

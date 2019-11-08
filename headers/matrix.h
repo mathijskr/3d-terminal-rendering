@@ -1,6 +1,9 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include <stdio.h>
+#include <math.h>
+
 #include "vector.h"
 
 typedef struct matrix_3x3 matrix_3x3;
@@ -12,6 +15,10 @@ struct matrix_3x3
 	float x3, y3, z3;
 };
 
-vec_3d matrix_muliply(matrix_3x3 *m1, vec_3d *v1);
+vec_3d multiply_matrix_3x3_vec3(matrix_3x3 *m1, vec_3d *v1);
+matrix_3x3 multiply_matrix_3x3_3x3(matrix_3x3 *m1, matrix_3x3 *m2);
+matrix_3x3 multiply_matrix_3x3_scalar(matrix_3x3 *m, float scalar);
+
+matrix_3x3 rotate_matrix(float angle);
 
 #endif

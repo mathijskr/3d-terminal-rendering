@@ -59,46 +59,67 @@ int main(int argv, char **argc)
 	bool EXIT = false;
 
 	matrix_3x3 proj = {	
-			1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 1.0f,
-			0.0f, 0.0f, 0.0f
+		1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 0.0f
 	};
 
-	
+	matrix_3x3 scale = {
+		2.0f, 0.0f, 0.0f,
+		0.0f, 2.0f, 0.0f,
+		0.0f, 0.0f, 2.0f
+	};
+
+	float rotation_angle = 0.0f;
+
 	/* Quit loop if exit is true. */
 	while(!EXIT){
 		tb_clear();
+
+		matrix_3x3 rotate = rotate_matrix(rotation_angle);
+
+		matrix_3x3 trans = multiply_matrix_3x3_3x3(&proj, &rotate);
+		trans = multiply_matrix_3x3_3x3(&trans, &scale);
 	
 		drawBackground();
-		drawCube(&proj, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);	
+		drawCube(&trans, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);	
 
 		/* Draw to screen. */
 		tb_present();
 
 		/* Update input with a timeout of n ms. */
-		int input = tb_peek_event(&ev, 0);
+		tb_peek_event(&ev, 0);
 
-		if(input == TB_INPUT_ESC)
+		if(ev.key == TB_KEY_ESC)
 			EXIT = true;
+
+		if(ev.ch == '+')
+			scale = multiply_matrix_3x3_scalar(&scale, 1.01f);
+
+		if(ev.ch == '-')
+			scale = multiply_matrix_3x3_scalar(&scale, 0.99f);
+
+		if(ev.ch == 'r')
+			rotation_angle += 0.1f;
 	}
 
 	tb_shutdown();
 	return 0;
 }
 
-void drawCube(matrix_3x3 *proj, float *points, int points_size, int *connections, int connections_size)
+void drawCube(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
 {
 	/* Draw cube points. */
 	for(int i = 0; i < points_size; i += DIMENSIONS) {
 		int x = points[i]; int y = points[i + 1]; int z = points[i + 2];
 		vec_3d point = {x, y, z};
-		draw3d(point, proj, '.');
+		draw3d(point, trans, '.');
 	}
 
-	drawCubeSides(proj, points, points_size, connections, connections_size);
+	drawCubeSides(trans, points, points_size, connections, connections_size);
 }
 
-void drawCubeSides(matrix_3x3 *proj, float *points, int points_size, int *connections, int connections_size)
+void drawCubeSides(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
 {
 	for(int i = 0; i < connections_size; i+=2) {
 		int index1 = connections[i] * DIMENSIONS;
@@ -108,18 +129,18 @@ void drawCubeSides(matrix_3x3 *proj, float *points, int points_size, int *connec
 		vec_3d point2 = { points[index2], points[index2 + 1], points[index2 + 2] };
 
 		/* Draw cube skeleton. */
-		drawLine(point1, point2, proj);
+		drawLine(point1, point2, trans);
 	}
 }
 
-void draw3d(vec_3d point, matrix_3x3 *proj, char c)
+void draw3d(vec_3d point, matrix_3x3 *trans, char c)
 {
-	vec_3d point_proj = matrix_muliply(proj, &point);
+	vec_3d point_proj = multiply_matrix_3x3_vec3(trans, &point);
 
-	tb_change_cell(point_proj.x, tb_height() - screen_ratio * (20.0f + point_proj.y), c, TB_GREEN, BACKGROUND_COLOR);
+	tb_change_cell(point_proj.x + 20.0f, tb_height() - screen_ratio * (20.0f + point_proj.y), c, TB_GREEN, BACKGROUND_COLOR);
 }
 
-void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *proj)
+void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *trans)
 {
 	if(point2.x < point1.x)
 		swap(&point2.x, &point1.x);
@@ -135,13 +156,13 @@ void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *proj)
 			/* Draw line between two y coordinates at the same x and z coordinates. */
 			for(int line_y = point1.y + 1; line_y < point2.y; line_y++) {
 				vec_3d point = {point1.x, line_y, point1.z};
-				draw3d(point, proj, '|');
+				draw3d(point, trans, '|');
 			}
 		} else if(cmp_float(&point2.y, &point1.y) == 0) {
 			/* Draw line between two x coordinates at the same y and z coordinates. */
 			for(int line_x = point1.x + 1; line_x < point2.x; line_x++) {
 				vec_3d point = {line_x, point1.y, point1.z};
-				draw3d(point, proj, '-');
+				draw3d(point, trans, '-');
 			}
 		}
 	} else {
@@ -149,7 +170,7 @@ void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *proj)
 			/* Draw line between two z coordinates at the same x and y coordinates. */
 			for(int line_z = point1.z + 1; line_z < point2.z; line_z++) {
 				vec_3d point = {point1.x, point1.y, line_z};
-				draw3d(point, proj, '-');
+				draw3d(point, trans, '-');
 			}
 		}
 	}
