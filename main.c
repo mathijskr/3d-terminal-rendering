@@ -25,8 +25,8 @@ int main(int argv, char **argc)
 	},
 		/* Connections */
 	{
-	/*	point1	point2	*/	
-		4,	5,	/* Back side */	
+	/*	point1	point2	*/
+		4,	5,	/* Back side */
 		5, 	6,
 		6,	7,
 		7,	4,
@@ -55,14 +55,14 @@ int main(int argv, char **argc)
 	tb_select_input_mode(TB_INPUT_ESC);
 	tb_select_output_mode(TB_OUTPUT_NORMAL);
 	tb_clear();
-	
+
 	matrix_3x3 identity_matrix = {
 		1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 1.0f
 	};
 
-	matrix_3x3 proj = {	
+	matrix_3x3 proj = {
 		1.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 1.0f,
 		0.0f, 0.0f, 0.0f
@@ -103,13 +103,13 @@ int main(int argv, char **argc)
 
 		matrix_3x3 trans = multiply_matrix_3x3_3x3(&proj, &rotate);
 		trans = multiply_matrix_3x3_3x3(&trans, &scale);
-	
+
 		drawBackground();
 
 		char text[70] = "Rotate with the x, y and z keys. Increase / decrease size with + and -";
-		drawText(10, 5, text, 70, TB_GREEN, TB_WHITE);
+		drawText(10, 5, text, 70, TB_BLACK, TB_WHITE);
 
-		drawCube(&trans, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);	
+		drawPoints(&trans, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);
 
 		/* Draw to screen. */
 		tb_present();
@@ -138,7 +138,7 @@ int main(int argv, char **argc)
 	return 0;
 }
 
-void drawCube(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
+void drawPoints(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
 {
 	/* Draw cube points. */
 	for(int i = 0; i < points_size; i += DIMENSIONS) {
@@ -147,10 +147,10 @@ void drawCube(matrix_3x3 *trans, float *points, int points_size, int *connection
 		draw3d(point, trans, '.');
 	}
 
-	drawCubeSides(trans, points, points_size, connections, connections_size);
+	drawConnections(trans, points, points_size, connections, connections_size);
 }
 
-void drawCubeSides(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
+void drawConnections(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
 {
 	for(int i = 0; i < connections_size; i+=2) {
 		int index1 = connections[i] * DIMENSIONS;
