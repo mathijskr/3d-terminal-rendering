@@ -4,9 +4,6 @@
 
 int screen_ratio = 1.0f;
 
-float CUBE_X_POS = 0.0f;
-float CUBE_Y_POS = 0.0f;
-
 int main(int argv, char **argc)
 {
 	Cube cube = {
@@ -88,9 +85,6 @@ int main(int argv, char **argc)
 	while(!EXIT){
 		tb_clear();
 
-		CUBE_X_POS = tb_width() / 2.0f;
-		CUBE_Y_POS = tb_height() / 2.0f;
-
 		matrix_3x3 rotate = identity_matrix;
 
 		matrix_3x3 rotate_x = rotate_x_matrix(rotation_angle.x);
@@ -101,15 +95,15 @@ int main(int argv, char **argc)
 		rotate = multiply_matrix_3x3_3x3(&rotate, &rotate_y);
 		rotate = multiply_matrix_3x3_3x3(&rotate, &rotate_z);
 
-		matrix_3x3 trans = multiply_matrix_3x3_3x3(&proj, &rotate);
-		trans = multiply_matrix_3x3_3x3(&trans, &scale);
+		matrix_3x3 trans = multiply_matrix_3x3_3x3(&scale, &rotate);
 
 		drawBackground();
 
 		char text[70] = "Rotate with the x, y and z keys. Increase / decrease size with + and -";
 		drawText(10, 5, text, 70, TB_BLACK, TB_WHITE);
 
-		drawPoints(&trans, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);
+		drawPoints(&trans, &proj, cube.points, CUBE_SIZE);
+		drawConnections(&trans, &proj, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);
 
 		/* Draw to screen. */
 		tb_present();
@@ -138,19 +132,18 @@ int main(int argv, char **argc)
 	return 0;
 }
 
-void drawPoints(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
+void drawPoints(matrix_3x3 *trans, matrix_3x3 *proj, float *points, int points_size)
 {
 	/* Draw cube points. */
 	for(int i = 0; i < points_size; i += DIMENSIONS) {
 		int x = points[i]; int y = points[i + 1]; int z = points[i + 2];
 		vec_3d point = {x, y, z};
-		draw3d(point, trans, '.');
+		point = multiply_matrix_3x3_vec3(trans, &point);
+		drawPoint(&point, proj, '.');
 	}
-
-	drawConnections(trans, points, points_size, connections, connections_size);
 }
 
-void drawConnections(matrix_3x3 *trans, float *points, int points_size, int *connections, int connections_size)
+void drawConnections(matrix_3x3 *trans, matrix_3x3 *proj, float *points, int points_size, int *connections, int connections_size)
 {
 	for(int i = 0; i < connections_size; i+=2) {
 		int index1 = connections[i] * DIMENSIONS;
@@ -159,19 +152,21 @@ void drawConnections(matrix_3x3 *trans, float *points, int points_size, int *con
 		vec_3d point1 = { points[index1], points[index1 + 1], points[index1 + 2] };
 		vec_3d point2 = { points[index2], points[index2 + 1], points[index2 + 2] };
 
+		point1 = multiply_matrix_3x3_vec3(trans, &point1);
+		point2 = multiply_matrix_3x3_vec3(trans, &point2);
+
 		/* Draw cube skeleton. */
-		drawLine(point1, point2, trans);
+		drawLine(point1, point2, proj);
 	}
 }
 
-void draw3d(vec_3d point, matrix_3x3 *trans, char c)
+void drawPoint(vec_3d *point, matrix_3x3 *proj, char c)
 {
-	vec_3d point_proj = multiply_matrix_3x3_vec3(trans, &point);
-
-	tb_change_cell(point_proj.x + CUBE_X_POS, tb_height() - screen_ratio * (CUBE_Y_POS + point_proj.y), c, TB_GREEN, BACKGROUND_COLOR);
+	*point = multiply_matrix_3x3_vec3(proj, point);
+	tb_change_cell(point->x, tb_height() - screen_ratio * (point->y), c, TB_GREEN, BACKGROUND_COLOR);
 }
 
-void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *trans)
+void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *proj)
 {
 	if(point2.x < point1.x)
 		swap(&point2.x, &point1.x);
@@ -184,24 +179,30 @@ void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *trans)
 
 	if(cmp_float(&point2.z, &point1.z) == 0) {
 		if(cmp_float(&point2.x, &point1.x) == 0) {
+
+				tb_change_cell(10, 10, 'A', TB_RED, BACKGROUND_COLOR);
 			/* Draw line between two y coordinates at the same x and z coordinates. */
 			for(int line_y = point1.y + 1; line_y < point2.y; line_y++) {
 				vec_3d point = {point1.x, line_y, point1.z};
-				draw3d(point, trans, '-');
+				drawPoint(&point, proj, '-');
 			}
 		} else if(cmp_float(&point2.y, &point1.y) == 0) {
+
+				tb_change_cell(10, 10, 'B', TB_RED, BACKGROUND_COLOR);
 			/* Draw line between two x coordinates at the same y and z coordinates. */
 			for(int line_x = point1.x + 1; line_x < point2.x; line_x++) {
 				vec_3d point = {line_x, point1.y, point1.z};
-				draw3d(point, trans, '-');
+				drawPoint(&point, proj, '-');
 			}
 		}
 	} else {
 		if(cmp_float(&point2.x, &point1.x) == 0 && cmp_float(&point2.y, &point1.y) == 0) {
+
+				tb_change_cell(10, 10, 'C', TB_RED, BACKGROUND_COLOR);
 			/* Draw line between two z coordinates at the same x and y coordinates. */
 			for(int line_z = point1.z + 1; line_z < point2.z; line_z++) {
 				vec_3d point = {point1.x, point1.y, line_z};
-				draw3d(point, trans, '-');
+				drawPoint(&point, proj, '-');
 			}
 		}
 	}
@@ -225,12 +226,9 @@ void drawText(int x, int y, char *text, int text_size, int color, int back_color
 
 int cmp_float(float *f1, float *f2)
 {
-	float margin = 0.001f;
-
-	if((*f1 - *f2) * (*f1 - *f2) < margin * margin)
+	if((int) (*f1 + 0.5f) == (int) (*f2 + 0.5f))
 		return 0;
-	else
-		return 1;
+	return 1;
 }
 
 void swap(float *i1, float *i2)
