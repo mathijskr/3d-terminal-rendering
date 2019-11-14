@@ -33,7 +33,6 @@ int main(int argv, char **argc)
 		2,	3,
 		3,	0,
 
-
 		0,	4,	/* Connecting back and front */
 		1,	5,
 		2,	6,
@@ -103,7 +102,12 @@ int main(int argv, char **argc)
 		drawText(10, 5, text, 70, TB_BLACK, TB_WHITE);
 
 		drawPoints(&trans, &proj, cube.points, CUBE_SIZE);
-		drawConnections(&trans, &proj, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);
+		//drawConnections(&trans, &proj, cube.points, CUBE_SIZE, cube.connections, CUBE_CONNECTIONS_SIZE);
+		
+		//vec_3d point1 = { 1.0f, -1.0f, 0.0f };
+		//vec_3d point2 = { 30.0f, 15.0f, 5.0f };
+
+		//drawLine(point1, point2, &identity_matrix);
 
 		/* Draw to screen. */
 		tb_present();
@@ -155,6 +159,8 @@ void drawConnections(matrix_3x3 *trans, matrix_3x3 *proj, float *points, int poi
 		point1 = multiply_matrix_3x3_vec3(trans, &point1);
 		point2 = multiply_matrix_3x3_vec3(trans, &point2);
 
+		//printf("Point1: %f, %f, %f, -> Point2: %f, %f, %f", point1.x, point1.y, point1.z, point2.x, point2.y, point2.z);
+
 		/* Draw cube skeleton. */
 		drawLine(point1, point2, proj);
 	}
@@ -177,35 +183,12 @@ void drawLine(vec_3d point1, vec_3d point2, matrix_3x3 *proj)
 	if(point2.z < point1.z)
 		swap(&point2.z, &point1.z);
 
-	if(cmp_float(&point2.z, &point1.z) == 0) {
-		if(cmp_float(&point2.x, &point1.x) == 0) {
+	float step = 1.0f / 20.0f;
 
-				tb_change_cell(10, 10, 'A', TB_RED, BACKGROUND_COLOR);
-			/* Draw line between two y coordinates at the same x and z coordinates. */
-			for(int line_y = point1.y + 1; line_y < point2.y; line_y++) {
-				vec_3d point = {point1.x, line_y, point1.z};
-				drawPoint(&point, proj, '-');
-			}
-		} else if(cmp_float(&point2.y, &point1.y) == 0) {
+	vec_3d dir = { (point2.x - point1.x) * step, (point2.y - point1.y) * step, (point2.z - point1.z) * step };
 
-				tb_change_cell(10, 10, 'B', TB_RED, BACKGROUND_COLOR);
-			/* Draw line between two x coordinates at the same y and z coordinates. */
-			for(int line_x = point1.x + 1; line_x < point2.x; line_x++) {
-				vec_3d point = {line_x, point1.y, point1.z};
-				drawPoint(&point, proj, '-');
-			}
-		}
-	} else {
-		if(cmp_float(&point2.x, &point1.x) == 0 && cmp_float(&point2.y, &point1.y) == 0) {
-
-				tb_change_cell(10, 10, 'C', TB_RED, BACKGROUND_COLOR);
-			/* Draw line between two z coordinates at the same x and y coordinates. */
-			for(int line_z = point1.z + 1; line_z < point2.z; line_z++) {
-				vec_3d point = {point1.x, point1.y, line_z};
-				drawPoint(&point, proj, '-');
-			}
-		}
-	}
+	for(vec_3d pos = point1; (int) pos.x < (int) point2.x || (int) pos.y < (int) point2.y || (int) pos.z < (int) point2.z; pos = vec_3d_add(&pos, &dir))
+		drawPoint(&pos, proj, '-');
 }
 
 void drawBackground()
